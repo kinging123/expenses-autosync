@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    /* Language and Environment */
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    
+    /* Modules */
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    
+    /* Emit */
+    "outDir": "./dist",
+    "rootDir": "./src",
+    // "noEmit": true, // Uncomment if you exclusively use `tsx` and don't plan to compile using `tsc`
+    
+    /* Type Checking */
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    
+    /* Interop Constraints */
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    
+    /* Completeness */
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
