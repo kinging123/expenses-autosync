@@ -1,5 +1,7 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { SyncEngine } from '../../../core/SyncEngine';
+import type { IStateStore } from '../../../core/ports/IStateStore';
+import { budgetbakersAuthRoutes } from '../../destinations/budgetbakers/budgetbakersAuth';
 import pino from 'pino';
 
 const logger = pino({ name: 'WebhookServer' });
@@ -7,7 +9,7 @@ const logger = pino({ name: 'WebhookServer' });
 export class WebhookServer {
   private fastify: FastifyInstance;
 
-  constructor(private syncEngine: SyncEngine) {
+  constructor(private syncEngine: SyncEngine, private stateStore: IStateStore) {
     this.fastify = Fastify({ logger: false });
     this.setupRoutes();
   }
@@ -16,6 +18,8 @@ export class WebhookServer {
     this.fastify.get('/health', async () => {
       return { status: 'ok' };
     });
+
+    this.fastify.register(budgetbakersAuthRoutes(this.stateStore), { prefix: '/api/auth/budgetbakers' });
 
     // Sub-routers for specific integrations could be registered here
     // Example: this.fastify.register(splitwiseWebhookRoutes(this.syncEngine), { prefix: '/webhooks/splitwise' });

@@ -11,9 +11,13 @@ export class SyncEngine {
   private sources: Map<string, ISource> = new Map();
   private destinations: Map<string, IDestination> = new Map();
 
-  constructor(private stateStore: IStateStore) {}
+  constructor(private stateStore: IStateStore) { }
 
-  registerSource(source: ISource) {
+  async registerSource(source: ISource) {
+    if (source.initialize) {
+      logger.info({ source: source.name }, 'Initializing source');
+      await source.initialize();
+    }
     this.sources.set(source.name, source);
     logger.info({ source: source.name }, 'Registered source');
   }
@@ -41,7 +45,7 @@ export class SyncEngine {
 
       // 2. Fetch recent transactions from the source
       const transactions = await source.fetchRecent(lastSyncTime || undefined);
-      
+
       if (transactions.length === 0) {
         logger.info({ source: sourceName }, 'No new transactions found');
         return;
@@ -59,7 +63,7 @@ export class SyncEngine {
       // 4. Update the sync state globally for this source
       // Find the latest transaction date to set as the new cursor
       const latestDate = new Date(Math.max(...transactions.map(t => t.date.getTime())));
-      
+
       await this.stateStore.setLastSyncTime(sourceName, latestDate);
       logger.info({ source: sourceName, newCursor: latestDate }, 'Updated sync state cursor');
 
@@ -80,16 +84,16 @@ export class SyncEngine {
     logger.info({ source: sourceName, count: transactions.length }, 'Processing webhook transactions');
 
     for (const dest of this.destinations.values()) {
-        logger.info({ source: sourceName, destination: dest.name, count: transactions.length }, 'Pushing webhook transactions to destination');
-        await dest.pushTransactions(transactions);
+      logger.info({ source: sourceName, destination: dest.name, count: transactions.length }, 'Pushing webhook transactions to destination');
+      await dest.pushTransactions(transactions);
     }
-    
+
     // Webhooks might not strictly update the state store cursor since they are pushed, 
     // but updating it ensures we don't re-fetch them later if we also poll.
     const latestDate = new Date(Math.max(...transactions.map(t => t.date.getTime())));
     const existingSyncTime = await this.stateStore.getLastSyncTime(sourceName);
     if (!existingSyncTime || latestDate > existingSyncTime) {
-         await this.stateStore.setLastSyncTime(sourceName, latestDate);
+      await this.stateStore.setLastSyncTime(sourceName, latestDate);
     }
   }
 }

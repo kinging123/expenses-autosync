@@ -14,7 +14,11 @@ export class SqliteStateStore implements IStateStore {
       CREATE TABLE IF NOT EXISTS sync_state (
         source_name TEXT PRIMARY KEY,
         last_sync_time TEXT NOT NULL
-      )
+      );
+      CREATE TABLE IF NOT EXISTS kv_store (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      );
     `);
   }
 
@@ -34,5 +38,19 @@ export class SqliteStateStore implements IStateStore {
     `);
     
     stmt.run(sourceName, timestamp.toISOString());
+  }
+
+  async getValue(key: string): Promise<string | null> {
+    const row = this.db.prepare('SELECT value FROM kv_store WHERE key = ?').get(key) as { value: string } | undefined;
+    return row ? row.value : null;
+  }
+
+  async setValue(key: string, value: string): Promise<void> {
+    const stmt = this.db.prepare(`
+      INSERT INTO kv_store(key, value)
+      VALUES(?, ?)
+      ON CONFLICT(key) DO UPDATE SET value=excluded.value
+    `);
+    stmt.run(key, value);
   }
 }

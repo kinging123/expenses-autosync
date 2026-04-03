@@ -20,9 +20,9 @@ async function bootstrap() {
 
   // 3. Initialize & Register Adapters
   const splitwise = new SplitwiseAdapter(env.SPLITWISE_API_KEY);
-  syncEngine.registerSource(splitwise);
+  await syncEngine.registerSource(splitwise);
 
-  const budgetBakers = new BudgetBakersAdapter(env.BUDGETBAKERS_EMAIL, env.BUDGETBAKERS_PASSWORD);
+  const budgetBakers = new BudgetBakersAdapter(stateStore);
   syncEngine.registerDestination(budgetBakers);
 
   // 4. Start Infrastructure (Cron & Webhooks)
@@ -30,7 +30,7 @@ async function bootstrap() {
   // Schedule Splitwise to sync every hour at minute 0
   cronRegistry.scheduleSync('splitwise', '0 * * * *');
 
-  const webhookServer = new WebhookServer(syncEngine);
+  const webhookServer = new WebhookServer(syncEngine, stateStore);
   await webhookServer.start(parseInt(env.PORT, 10));
 
   logger.info('System bootstrapped and running!');

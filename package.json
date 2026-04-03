@@ -5,13 +5,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsx src/index.ts"
+    "start": "tsx src/index.ts",
+    "login:budgetbakers": "tsx src/scripts/login-budgetbakers.ts",
+    "test:budgetbakers": "tsx src/scripts/test-budgetbakers-push.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "better-sqlite3": "^12.8.0",
+    "budgetbakers-wallet-importer": "^1.0.1",
     "dotenv": "^17.3.1",
     "fastify": "^5.8.4",
     "node-cron": "^4.2.1",
@@ -22,6 +25,7 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.5.0",
     "@types/node-cron": "^3.0.11",
+    "@types/qs": "^6.15.0",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2"
   }
